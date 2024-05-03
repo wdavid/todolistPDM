@@ -5,14 +5,23 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.app.denuncia.sivar.ui.components.BottonNavBar.NavBarComponent
+import com.app.denuncia.sivar.ui.components.BottonNavBar.NavBarGraph
+import com.app.denuncia.sivar.ui.components.BottonNavBar.NavBarItemList
 import com.app.todolist.ui.theme.ToDoListTheme
 
+
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -22,25 +31,41 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting("Android")
+                    NavBar()
                 }
             }
         }
     }
 }
 
+@Preview(showSystemUi = true, showBackground = true)
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    ToDoListTheme {
-        Greeting("Android")
+fun NavBar() {
+    val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute: String? = navBackStackEntry?.destination?.route
+    val navItems = NavBarItemList()
+    Scaffold(
+        modifier = Modifier,
+        //containerColor = blue100,
+        bottomBar = {
+            NavBarComponent(items = navItems, currentRoute = currentRoute) {
+                    nav -> navController.navigate(nav.route) {
+                navController.graph.startDestinationRoute?.let {
+                        route -> popUpTo(route) {
+                    saveState = true
+                }
+                }
+                launchSingleTop = true
+                restoreState = true
+            }
+            }
+        }
+    ) { innerPadding ->
+        NavBarGraph(
+            navController = navController,
+            innerPadding = innerPadding
+        )
     }
 }
+
